@@ -60,14 +60,14 @@ function segmentBlockedByColliders(ax, az, bx, bz, colliders) {
 let nextId = 1;
 
 export class Character {
-  constructor({ scene, colliders, furHex, bandanaHex, name, isPlayer = false }) {
+  constructor({ scene, colliders, furHex, bandanaHex, gradientMap, name, isPlayer = false }) {
     this.id = nextId++;
     this.scene = scene;
     this.colliders = colliders;
     this.name = name;
     this.isPlayer = isPlayer;
 
-    const dog = buildDog({ furHex, bandanaHex });
+    const dog = buildDog({ furHex, bandanaHex, gradientMap });
     this.dog = dog;
     this.root = dog.root;
     scene.add(this.root);
@@ -87,7 +87,9 @@ export class Character {
     this.muzzleFlashTimer = 0;
     this._walkCycle = 0;
     this._deathSink = 0;
-    this._legStrideBase = { frontLeft: 1, backRight: 1, frontRight: -1, backLeft: -1 };
+    this._legStrideBase = { legL: 1, legR: -1 };
+    this._bodyScale = new THREE.Vector3(1, 1, 1);
+    this._landSquash = 0;
 
     this.speedFactor = 1; // 0..1, how fast this frame's move was (for animation)
   }
@@ -180,6 +182,7 @@ export class Character {
       this.root.position.set(this.position.x, 0.05, this.position.z);
       return;
     }
+    const wasGrounded = this.grounded;
     this.velocityY += WORLD.gravity * dt;
     let y = (this.root.position.y || 0) + this.velocityY * dt;
     if (y <= 0) {
@@ -187,6 +190,7 @@ export class Character {
       this.velocityY = 0;
       this.grounded = true;
     }
+    if (this.grounded && !wasGrounded) this._landSquash = 1; // just touched down — trigger a squish
     this.root.position.set(this.position.x, y, this.position.z);
     this.root.rotation.y = this.heading;
 
@@ -199,33 +203,63 @@ export class Character {
     this._animate(dt, y);
   }
 
+  // Bouncy blob rig: 2 stub legs + 2 mitten arms swing for locomotion, the
+  // whole body squashes/stretches (anchored at ground level) for jumps and
+  // landings, and the tail gives a little idle wag.
   _animate(dt, airY) {
     const inAir = airY > 0.02;
     const speed = this.speedFactor || 0;
+    const dog = this.dog;
+
+    if (this._landSquash > 0) this._landSquash = Math.max(0, this._landSquash - dt * 5.5);
+
+    let targetScaleY = 1;
+    let targetScaleXZ = 1;
+
     if (inAir) {
       this._walkCycle += dt * 4;
-      const spread = clamp(airY / 2, 0, 1);
-      for (const leg of Object.values(this.dog.legs)) {
-        leg.rotation.x = -0.5 * spread;
-      }
-      this.dog.tail.rotation.x = 0.4;
+      const rise = clamp(this.velocityY / 10, -1, 1);
+      targetScaleY = 1 + rise * 0.16;
+      targetScaleXZ = 1 - rise * 0.1;
+      const swing = -0.35 * clamp(airY / 1.5, 0, 1);
+      dog.legL.rotation.x = swing;
+      dog.legR.rotation.x = swing;
+      dog.armL.rotation.x = -0.3;
+      dog.armR.rotation.x = -0.3;
+      dog.tail.rotation.x = 0.4;
     } else if (Math.abs(speed) > 0.05) {
-      this._walkCycle += dt * 10 * Math.max(0.4, Math.abs(speed));
-      for (const [name, leg] of Object.entries(this.dog.legs)) {
-        const dir = this._legStrideBase[name];
-        leg.rotation.x = Math.sin(this._walkCycle * (speed < 0 ? -1 : 1) + (dir > 0 ? 0 : Math.PI)) * 0.55;
-      }
-      this.dog.tail.rotation.x = Math.sin(this._walkCycle * 2) * 0.15;
+      this._walkCycle += dt * 11 * Math.max(0.4, Math.abs(speed));
+      const dir = speed < 0 ? -1 : 1;
+      const swing = Math.sin(this._walkCycle * dir) * 0.6;
+      dog.legL.rotation.x = swing * this._legStrideBase.legL;
+      dog.legR.rotation.x = swing * this._legStrideBase.legR;
+      dog.armL.rotation.x = -swing * this._legStrideBase.legL * 0.5;
+      dog.armR.rotation.x = -swing * this._legStrideBase.legR * 0.5;
+      dog.tail.rotation.x = Math.sin(this._walkCycle * 2) * 0.15;
+      targetScaleY = 1 + Math.abs(Math.sin(this._walkCycle * 2)) * 0.03;
     } else {
       this._walkCycle += dt * 2;
-      for (const leg of Object.values(this.dog.legs)) {
-        leg.rotation.x *= 0.85;
-      }
-      this.dog.tail.rotation.x = Math.sin(this._walkCycle) * 0.08;
-      this.dog.head.position.y = 1.0 + Math.sin(this._walkCycle * 1.3) * 0.01;
+      dog.legL.rotation.x *= 0.8;
+      dog.legR.rotation.x *= 0.8;
+      dog.armL.rotation.x *= 0.8;
+      dog.armR.rotation.x *= 0.8;
+      dog.tail.rotation.x = Math.sin(this._walkCycle) * 0.08;
+      targetScaleY = 1 + Math.sin(this._walkCycle * 1.3) * 0.012; // idle breathing
+      targetScaleXZ = 1 - Math.sin(this._walkCycle * 1.3) * 0.008;
     }
-    // ear perk toward motion, subtle bob
-    this.dog.body.position.y = inAir ? 0 : Math.abs(Math.sin(this._walkCycle * 2)) * 0.015;
+
+    // landing squash overrides: wide and flat right after touchdown, easing back
+    if (this._landSquash > 0) {
+      const s = this._landSquash;
+      targetScaleY = targetScaleY * (1 - s) + (1 - 0.32 * s) * s;
+      targetScaleXZ = targetScaleXZ * (1 - s) + (1 + 0.22 * s) * s;
+    }
+
+    const lerpT = 1 - Math.pow(0.001, dt);
+    this._bodyScale.x += (targetScaleXZ - this._bodyScale.x) * lerpT;
+    this._bodyScale.z += (targetScaleXZ - this._bodyScale.z) * lerpT;
+    this._bodyScale.y += (targetScaleY - this._bodyScale.y) * lerpT;
+    dog.body.scale.copy(this._bodyScale);
   }
 
   hasLineOfSightTo(other) {

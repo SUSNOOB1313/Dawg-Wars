@@ -8,7 +8,7 @@ import { Economy } from './Economy.js';
 import { AudioSynth } from './AudioSynth.js';
 import { fireShotgun } from './Weapon.js';
 import { WORLD, WEAPON, COMBAT, ENTITY_COUNT, CAMERA } from './Constants.js';
-import { skyGradientTexture } from './Textures.js';
+import { skyGradientTexture, toonGradientTexture } from './Textures.js';
 
 const deg2rad = (d) => (d * Math.PI) / 180;
 const BOT_ACCURACY_SPREAD = deg2rad(COMBAT.botAccuracySpreadDeg);
@@ -30,15 +30,19 @@ export class Game {
     this.renderer.shadowMap.enabled = true;
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
-    this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    this.renderer.toneMappingExposure = 1.05;
+    // Flat, un-tonemapped output keeps the candy palette punchy — ACES-style
+    // filmic tone mapping crushes/desaturates the bright toy colors we want here.
+    this.renderer.toneMapping = THREE.NoToneMapping;
 
     this.scene = new THREE.Scene();
     const isMobile = window.matchMedia('(pointer: coarse)').matches || 'ontouchstart' in window;
     this.camera = new THREE.PerspectiveCamera(isMobile ? CAMERA.mobileFov : CAMERA.fov, window.innerWidth / window.innerHeight, 0.1, 220);
 
+    // Shared quantized ramp so every toon-shaded surface (dogs + town) bands consistently.
+    this.gradientMap = toonGradientTexture();
+
     this._setupSkyAndLights();
-    const { colliders, arenaHalf, mill } = buildTown(this.scene);
+    const { colliders, arenaHalf, mill } = buildTown(this.scene, this.gradientMap);
     this.colliders = colliders;
     this.arenaHalf = arenaHalf;
     this.millHub = mill?.userData?.hub || null;
@@ -73,12 +77,14 @@ export class Game {
     const skyMat = new THREE.MeshBasicMaterial({ map: skyTex, side: THREE.BackSide, fog: false });
     this.sky = new THREE.Mesh(skyGeo, skyMat);
     this.scene.add(this.sky);
-    this.scene.fog = new THREE.Fog(0xe7b980, 55, 150);
+    // Light, airy fog matching the sky horizon — keeps the bright toy-town
+    // look clean at distance instead of muddying it with dusty haze.
+    this.scene.fog = new THREE.Fog(0xbfe7ff, 70, 175);
 
-    const hemi = new THREE.HemisphereLight(0xfff2d6, 0x6b4a2e, 0.75);
+    const hemi = new THREE.HemisphereLight(0xffffff, 0x8fd4dc, 1.1);
     this.scene.add(hemi);
 
-    const sun = new THREE.DirectionalLight(0xfff0d0, 1.6);
+    const sun = new THREE.DirectionalLight(0xfffaf0, 1.4);
     sun.position.set(40, 60, 20);
     sun.castShadow = true;
     sun.shadow.mapSize.set(2048, 2048);
@@ -117,10 +123,10 @@ export class Game {
   }
 
   _spawnAllEntities() {
-    this.player = new Player({ scene: this.scene, colliders: this.colliders, arenaHalf: this.arenaHalf });
+    this.player = new Player({ scene: this.scene, colliders: this.colliders, arenaHalf: this.arenaHalf, gradientMap: this.gradientMap });
     this.bots = [];
     for (let i = 0; i < ENTITY_COUNT.bots; i++) {
-      this.bots.push(new Bot({ scene: this.scene, colliders: this.colliders, arenaHalf: this.arenaHalf }, i));
+      this.bots.push(new Bot({ scene: this.scene, colliders: this.colliders, arenaHalf: this.arenaHalf, gradientMap: this.gradientMap }, i));
     }
     this.allCharacters = [this.player, ...this.bots];
     this._placeAllAtSpawns();

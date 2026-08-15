@@ -70,20 +70,25 @@ Plain [Three.js](https://threejs.org/) (WebGL) via [Vite](https://vitejs.dev/),
 no game engine, no external art/audio assets — everything is generated at
 runtime:
 
+- **Art style** — a bright, cel-shaded toy/party-game look (chibi round dogs,
+  candy-colored buildings, `MeshToonMaterial` + a shared quantized gradient
+  ramp for banded cartoon shading everywhere) rather than photoreal desert
+  grit.
 - **Models** — the dog (and its shotgun) is built procedurally out of
-  primitives in `src/game/DogModel.js`, animated with a simple procedural
-  walk/jump cycle.
-- **Textures** — wood planks, sand, dirt road, roofing and the sky gradient
-  are all drawn onto `<canvas>` at load time (`src/game/Textures.js`), so the
-  game has zero binary image dependencies and works fully offline once
-  loaded.
+  primitives in `src/game/DogModel.js`: a big bouncy egg-shaped body, floppy
+  ears, big dot eyes, white mitten paws gripping the shotgun out front, and
+  stub legs. The whole body squashes/stretches for jumps and landings.
+- **Textures** — wood planks, sand, dirt road, roofing, the sky gradient (with
+  painted clouds) and the toon shading ramp are all drawn onto `<canvas>` at
+  load time (`src/game/Textures.js`), so the game has zero binary image
+  dependencies and works fully offline once loaded.
 - **Sound** — gunfire, reload clacks, hit yelps, jump yips, coin chimes and
   death thuds are synthesized with the Web Audio API (`src/game/AudioSynth.js`),
   zero audio files.
-- **World** — the ghost town (saloon-style buildings, a windmill, cacti,
-  fences, a dirt main street) is procedurally laid out in `src/game/Town.js`,
-  which also returns simple AABB colliders used for both movement collision
-  and shotgun/vision line-of-sight blocking.
+- **World** — the ghost town (candy-colored saloon-style buildings, a
+  windmill, cacti, fences, a dirt main street) is procedurally laid out in
+  `src/game/Town.js`, which also returns simple AABB colliders used for both
+  movement collision and shotgun/vision line-of-sight blocking.
 - **Combat** — `src/game/Weapon.js` fires a 9-pellet shotgun cone per trigger
   pull with per-pellet ray tests (sphere hitboxes + AABB wall blocking) and
   range-based damage falloff.

@@ -2,8 +2,9 @@ import * as THREE from 'three';
 import { sandTexture, plankTexture, roofTexture, dirtRoadTexture } from './Textures.js';
 import { WORLD } from './Constants.js';
 
-// Builds a western ghost town: main street lined with saloon-style buildings,
-// a windmill, fences, cacti and tumbleweeds. Returns the group plus a list of
+// Builds a toy-diorama western town: main street lined with candy-colored
+// saloon-style buildings, a windmill, fences, cacti. Cel-shaded (MeshToonMaterial)
+// throughout for a bright cartoon look. Returns the group plus a list of
 // AABB colliders { minX, maxX, minZ, maxZ } used for movement + line-of-sight blocking.
 
 function box(w, h, d, mat) {
@@ -13,17 +14,20 @@ function box(w, h, d, mat) {
   return m;
 }
 
-function makeBuilding({ x, z, w, d, h, facing = 0, plankColor, hasSign = true }) {
+function makeBuilding({ x, z, w, d, h, facing = 0, plankColor, trimColor, hasSign = true }, gradientMap) {
   const g = new THREE.Group();
   g.position.set(x, 0, z);
   g.rotation.y = facing;
 
-  const wallMat = new THREE.MeshStandardMaterial({
-    map: plankTexture(plankColor, '#3a2415'),
-    roughness: 0.85,
-  });
-  const roofMat = new THREE.MeshStandardMaterial({ map: roofTexture(), roughness: 0.9 });
-  const trimMat = new THREE.MeshStandardMaterial({ color: '#2c1b10', roughness: 0.8 });
+  const toon = (color, map) => {
+    const params = { color, gradientMap: gradientMap || undefined };
+    if (map) params.map = map;
+    return new THREE.MeshToonMaterial(params);
+  };
+
+  const wallMat = toon(0xffffff, plankTexture(plankColor, trimColor));
+  const roofMat = toon(0xffffff, roofTexture());
+  const trimMat = toon(trimColor);
 
   const main = box(w, h, d, wallMat);
   main.position.y = h / 2;
@@ -41,7 +45,7 @@ function makeBuilding({ x, z, w, d, h, facing = 0, plankColor, hasSign = true })
   g.add(porchRoof);
 
   const postGeo = new THREE.CylinderGeometry(0.07, 0.07, h * 0.62, 6);
-  const postMat = new THREE.MeshStandardMaterial({ color: '#4a2f1a', roughness: 0.8 });
+  const postMat = toon('#f2e2c0');
   for (const sx of [-1, 1]) {
     const post = new THREE.Mesh(postGeo, postMat);
     post.position.set(sx * (w / 2 - 0.15), (h * 0.62) / 2, d / 2 + 1.3);
@@ -55,12 +59,12 @@ function makeBuilding({ x, z, w, d, h, facing = 0, plankColor, hasSign = true })
   g.add(roof);
 
   // door + windows (flat dark boxes for contrast)
-  const openMat = new THREE.MeshStandardMaterial({ color: '#160f0a', roughness: 0.6 });
+  const openMat = toon('#3a2a3f');
   const door = box(0.9, 1.7, 0.05, openMat);
   door.position.set(0, 0.85, d / 2 + 0.03);
   g.add(door);
   if (hasSign) {
-    const signMat = new THREE.MeshStandardMaterial({ color: '#d8c39a', roughness: 0.7 });
+    const signMat = toon('#fff8ea');
     const sign = box(w * 0.5, 0.5, 0.06, signMat);
     sign.position.set(0, h + parapetH * 0.55, d / 2 + 0.1);
     g.add(sign);
@@ -84,9 +88,9 @@ function aabbForBuilding(b) {
   };
 }
 
-function makeCactus() {
+function makeCactus(gradientMap) {
   const g = new THREE.Group();
-  const mat = new THREE.MeshStandardMaterial({ color: '#4f7d4a', roughness: 0.75 });
+  const mat = new THREE.MeshToonMaterial({ color: '#5fcf6a', gradientMap: gradientMap || undefined });
   const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.28, 0.34, 2.0, 8), mat);
   trunk.position.y = 1.0;
   trunk.castShadow = true;
@@ -121,8 +125,8 @@ function makeCactus() {
   return g;
 }
 
-function makeFencePost() {
-  const mat = new THREE.MeshStandardMaterial({ color: '#5c4128', roughness: 0.85 });
+function makeFencePost(gradientMap) {
+  const mat = new THREE.MeshToonMaterial({ color: '#e0a868', gradientMap: gradientMap || undefined });
   const g = new THREE.Group();
   const post = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.06, 1.1, 5), mat);
   post.position.y = 0.55;
@@ -131,10 +135,10 @@ function makeFencePost() {
   return g;
 }
 
-function makeWindmill() {
+function makeWindmill(gradientMap) {
   const g = new THREE.Group();
-  const woodMat = new THREE.MeshStandardMaterial({ color: '#4a3220', roughness: 0.85 });
-  const metalMat = new THREE.MeshStandardMaterial({ color: '#8a8a86', roughness: 0.5, metalness: 0.6 });
+  const woodMat = new THREE.MeshToonMaterial({ color: '#e0a868', gradientMap: gradientMap || undefined });
+  const metalMat = new THREE.MeshToonMaterial({ color: '#e8ecef', gradientMap: gradientMap || undefined });
   const tower = new THREE.Mesh(new THREE.CylinderGeometry(0.25, 0.5, 6, 8), woodMat);
   tower.position.y = 3;
   tower.castShadow = true;
@@ -155,26 +159,33 @@ function makeWindmill() {
   return g;
 }
 
-export function buildTown(scene) {
+export function buildTown(scene, gradientMap = null) {
   const colliders = [];
   const size = WORLD.groundSize;
 
   // ground
-  const groundMat = new THREE.MeshStandardMaterial({ map: sandTexture(), roughness: 1 });
+  const groundMat = new THREE.MeshToonMaterial({ map: sandTexture(), gradientMap: gradientMap || undefined });
   const ground = new THREE.Mesh(new THREE.PlaneGeometry(size, size), groundMat);
   ground.rotation.x = -Math.PI / 2;
   ground.receiveShadow = true;
   scene.add(ground);
 
   // main street
-  const roadMat = new THREE.MeshStandardMaterial({ map: dirtRoadTexture(), roughness: 1 });
+  const roadMat = new THREE.MeshToonMaterial({ map: dirtRoadTexture(), gradientMap: gradientMap || undefined });
   const road = new THREE.Mesh(new THREE.PlaneGeometry(9, size), roadMat);
   road.rotation.x = -Math.PI / 2;
   road.position.y = 0.01;
   road.receiveShadow = true;
   scene.add(road);
 
-  const plankColors = ['#8a5a3a', '#7a4c30', '#966a42', '#6f4527', '#835434'];
+  // candy-colored storefronts: pink/salmon and orange/tan alternating, cream/teal accents
+  const buildingPalette = [
+    { wall: '#f5a8b8', trim: '#d97c8c' },
+    { wall: '#f7c07a', trim: '#d99a52' },
+    { wall: '#fbe3a3', trim: '#dcb96e' },
+    { wall: '#8fd4dc', trim: '#5fa8b0' },
+    { wall: '#f2a4d0', trim: '#c96fa0' },
+  ];
   const buildingsGroup = new THREE.Group();
   scene.add(buildingsGroup);
 
@@ -185,20 +196,22 @@ export function buildTown(scene) {
     const w = 6 + Math.random() * 3;
     const d = 6 + Math.random() * 2.5;
     const h = 3.2 + Math.random() * 1.6;
-    rowSpecs.push({ x: -7 - w / 2, z, w, d, h, facing: Math.PI / 2, plankColor: plankColors[i % plankColors.length] });
-    rowSpecs.push({ x: 7 + w / 2, z: z + 4, w, d, h, facing: -Math.PI / 2, plankColor: plankColors[(i + 2) % plankColors.length] });
+    const p1 = buildingPalette[i % buildingPalette.length];
+    const p2 = buildingPalette[(i + 2) % buildingPalette.length];
+    rowSpecs.push({ x: -7 - w / 2, z, w, d, h, facing: Math.PI / 2, plankColor: p1.wall, trimColor: p1.trim });
+    rowSpecs.push({ x: 7 + w / 2, z: z + 4, w, d, h, facing: -Math.PI / 2, plankColor: p2.wall, trimColor: p2.trim });
     z += 13 + Math.random() * 6;
     i++;
   }
 
   for (const spec of rowSpecs) {
-    const b = makeBuilding(spec);
+    const b = makeBuilding(spec, gradientMap);
     buildingsGroup.add(b.group);
     colliders.push(aabbForBuilding(b));
   }
 
   // windmill landmark
-  const mill = makeWindmill();
+  const mill = makeWindmill(gradientMap);
   mill.position.set(-22, 0, size / 2 - 20);
   scene.add(mill);
   colliders.push({ minX: mill.position.x - 0.6, maxX: mill.position.x + 0.6, minZ: mill.position.z - 0.6, maxZ: mill.position.z + 0.6 });
@@ -210,13 +223,13 @@ export function buildTown(scene) {
     const x = side * (16 + Math.random() * (size / 2 - 20));
     const zz = (Math.random() - 0.5) * (size - 20);
     if (Math.random() < 0.55) {
-      const cactus = makeCactus();
+      const cactus = makeCactus(gradientMap);
       cactus.position.set(x, 0, zz);
       cactus.rotation.y = Math.random() * Math.PI * 2;
       decor.add(cactus);
       colliders.push({ minX: x - 0.35, maxX: x + 0.35, minZ: zz - 0.35, maxZ: zz + 0.35 });
     } else {
-      const post = makeFencePost();
+      const post = makeFencePost(gradientMap);
       post.position.set(x, 0, zz);
       decor.add(post);
     }
