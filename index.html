@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <meta name="theme-color" content="#2b1a10" />
+    <title>Dawg Wars — Ghost Town Shotgun Showdown</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🐕</text></svg>" />
+  </head>
+  <body>
+    <div id="app">
+      <canvas id="scene"></canvas>
+
+      <!-- Start / title screen -->
+      <div id="start-screen" class="overlay">
+        <div class="panel">
+          <h1>DAWG WARS</h1>
+          <p class="subtitle">Ghost Town Shotgun Showdown</p>
+          <p class="blurb">
+            You're a dog with a pump shotgun and a spring in your step. 15 outlaw dogs are
+            roaming the town — they'll gun for you, and they'll gun for each other. Be the
+            last one standing.
+          </p>
+          <div class="rules">
+            <div><strong>🥇 1st place</strong> +15 coins</div>
+            <div><strong>🥈 2nd place</strong> +10 coins</div>
+            <div><strong>🥉 3rd place</strong> +5 coins</div>
+            <div><strong>💀 Last place</strong> −1 coin</div>
+          </div>
+          <div id="coin-balance-start" class="coin-balance">Coins: <span id="coin-count-start">0</span></div>
+          <button id="start-btn" class="big-btn">ENTER THE TOWN</button>
+          <div class="controls-hint" id="controls-hint-desktop">
+            <strong>Controls:</strong> W forward · S back · A/D turn · Space bounce · Click to fire (1.5s reload)
+          </div>
+          <div class="controls-hint" id="controls-hint-mobile" style="display:none">
+            <strong>Controls:</strong> Left stick to move &amp; turn · JUMP to bounce · FIRE to shoot
+          </div>
+        </div>
+      </div>
+
+      <!-- In-game HUD -->
+      <div id="hud" class="hidden">
+        <div class="hud-top">
+          <div class="hp-wrap">
+            <div class="hp-label">HP</div>
+            <div id="hp-pips" class="hp-pips"></div>
+            <div class="reload-wrap">
+              <div id="reload-label" class="reload-label">READY</div>
+              <div class="reload-bar-bg"><div id="reload-bar" class="reload-bar-fill"></div></div>
+            </div>
+          </div>
+          <div class="alive-counter">🐾 <span id="alive-count">16</span> alive</div>
+          <div class="coin-hud">🪙 <span id="coin-count-hud">0</span></div>
+        </div>
+
+        <div class="crosshair" id="crosshair">
+          <div class="crosshair-line h"></div>
+          <div class="crosshair-line v"></div>
+        </div>
+
+        <div id="kill-feed" class="kill-feed"></div>
+
+        <div id="notice-banner" class="notice-banner hidden"></div>
+      </div>
+
+      <!-- Mobile touch controls get injected here by Input.js -->
+      <div id="mobile-controls-root"></div>
+
+      <!-- End of match screen -->
+      <div id="end-screen" class="overlay hidden">
+        <div class="panel">
+          <h1 id="end-title">ELIMINATED</h1>
+          <p id="end-placement" class="subtitle">Placement: --</p>
+          <p id="end-reward" class="blurb"></p>
+          <div class="coin-balance">Coins: <span id="coin-count-end">0</span></div>
+          <button id="restart-btn" class="big-btn">PLAY AGAIN</button>
+        </div>
+      </div>
+
+      <div id="loading-screen" class="overlay">
+        <div class="panel"><h1>DAWG WARS</h1><p class="subtitle">Loading the town…</p></div>
+      </div>
+    </div>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
