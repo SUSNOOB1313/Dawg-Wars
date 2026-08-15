@@ -7,8 +7,8 @@ const VISION_HALF = deg2rad(COMBAT.engagedVisionConeDeg);
 const AIM_TOLERANCE = deg2rad(COMBAT.botAimToleranceDeg);
 const ACCURACY_SPREAD = deg2rad(COMBAT.botAccuracySpreadDeg);
 
-const FUR_COLORS = ['#8fd3e8', '#a8e6b0', '#f2a6c6', '#f7f3e8', '#f6b26b', '#c4a8f0', '#8fb8f0', '#f28b8b', '#9de0c9', '#f0d178', '#d3a6f0', '#7ecbe0', '#f0a1a1', '#b8e08f', '#e8c1e0'];
-const BANDANA_COLORS = ['#2c8f9c', '#e8483a', '#3fa35a', '#8e4fc9', '#e8a71b', '#3a5fc4', '#e8683a', '#c93fa0', '#2ba385', '#c9922e'];
+const FUR_COLORS = ['#2fc9e8', '#3de07a', '#ff6fb0', '#fdf6e8', '#ff9a3d', '#b366f0', '#4d8fff', '#ff5c5c', '#2ddca0', '#ffd23d', '#c766f0', '#38b6ff', '#ff6b6b', '#6bdc3d', '#f27fff'];
+const BANDANA_COLORS = ['#0a8c9c', '#ff3b2f', '#1fb84a', '#8014d1', '#ff9a0a', '#1e46d1', '#ff5c1e', '#d10a92', '#0ab884', '#d19a0a'];
 
 function angleWrap(a) {
   while (a > Math.PI) a -= Math.PI * 2;

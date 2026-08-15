@@ -41,7 +41,7 @@ export function toonGradientTexture() {
   c.width = 4;
   c.height = 1;
   const ctx = c.getContext('2d');
-  const shades = [110, 165, 210, 255];
+  const shades = [150, 195, 228, 255]; // brighter floor keeps shadowed faces vibrant instead of muddy
   for (let i = 0; i < shades.length; i++) {
     ctx.fillStyle = `rgb(${shades[i]},${shades[i]},${shades[i]})`;
     ctx.fillRect(i, 0, 1, 1);
@@ -56,13 +56,14 @@ export function toonGradientTexture() {
 export function sandTexture() {
   const c = makeCanvas(256);
   const ctx = c.getContext('2d');
-  ctx.fillStyle = '#eab06a';
+  ctx.fillStyle = '#ffb84d';
   ctx.fillRect(0, 0, 256, 256);
-  noise(ctx, 256, 256, 0.1, () => {
-    const v = 220 + Math.random() * 25;
-    return [v, v * 0.78, v * 0.44];
+  // light, sparse speckle — clean and flat rather than dusty/grainy
+  noise(ctx, 256, 256, 0.045, () => {
+    const v = 245 + Math.random() * 10;
+    return [v, v * 0.82, v * 0.5];
   });
-  noise(ctx, 256, 256, 0.04, () => [201, 140, 76]);
+  noise(ctx, 256, 256, 0.015, () => [230, 150, 70]);
   return toTexture(c, [24, 24]);
 }
 
@@ -80,9 +81,9 @@ export function plankTexture(baseColor = '#f2a4b0', dark = '#d97c8c') {
     ctx.lineTo(128, i * plankH);
     ctx.stroke();
   }
-  noise(ctx, 128, 128, 0.06, () => {
-    const v = 245 + Math.random() * 10;
-    return [v, v * 0.95, v * 0.95];
+  noise(ctx, 128, 128, 0.03, () => {
+    const v = 250 + Math.random() * 5;
+    return [v, v * 0.97, v * 0.97];
   });
   return toTexture(c, [2, 2]);
 }
@@ -106,13 +107,13 @@ export function roofTexture(baseColor = '#c98a4e', dark = '#a06a35') {
 export function dirtRoadTexture() {
   const c = makeCanvas(256);
   const ctx = c.getContext('2d');
-  ctx.fillStyle = '#d9a468';
+  ctx.fillStyle = '#f0b56a';
   ctx.fillRect(0, 0, 256, 256);
-  noise(ctx, 256, 256, 0.14, () => {
-    const v = 225 + Math.random() * 20;
-    return [v, v * 0.82, v * 0.55];
+  noise(ctx, 256, 256, 0.06, () => {
+    const v = 248 + Math.random() * 8;
+    return [v, v * 0.85, v * 0.58];
   });
-  ctx.strokeStyle = 'rgba(160,105,55,0.3)';
+  ctx.strokeStyle = 'rgba(160,105,55,0.25)';
   for (let i = 0; i < 2; i++) {
     ctx.lineWidth = 9;
     ctx.beginPath();
@@ -149,10 +150,10 @@ export function skyGradientTexture() {
   const c = makeCanvas(512);
   const ctx = c.getContext('2d');
   const grad = ctx.createLinearGradient(0, 0, 0, 512);
-  grad.addColorStop(0, '#3fa0f0');
-  grad.addColorStop(0.5, '#7ec8f5');
-  grad.addColorStop(0.78, '#bfe7ff');
-  grad.addColorStop(1, '#e9f6ff');
+  grad.addColorStop(0, '#1e90ff');
+  grad.addColorStop(0.5, '#4fb8ff');
+  grad.addColorStop(0.78, '#a8e0ff');
+  grad.addColorStop(1, '#eaf8ff');
   ctx.fillStyle = grad;
   ctx.fillRect(0, 0, 512, 512);
 
@@ -178,9 +179,9 @@ export function furColorMaterial(hex) {
   ctx.fillStyle = hex;
   ctx.fillRect(0, 0, 64, 64);
   const base = new THREE.Color(hex);
-  // gentle plasticky sheen speckle rather than realistic fur grain
-  noise(ctx, 64, 64, 0.15, () => {
-    const v = base.clone().multiplyScalar(0.92 + Math.random() * 0.16);
+  // very light plasticky sheen speckle — flat and clean, not grainy
+  noise(ctx, 64, 64, 0.08, () => {
+    const v = base.clone().multiplyScalar(0.96 + Math.random() * 0.09);
     return [v.r * 255, v.g * 255, v.b * 255];
   });
   const tex = new THREE.CanvasTexture(c);

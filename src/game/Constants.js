@@ -28,7 +28,7 @@ export const WEAPON = {
 };
 
 export const COMBAT = {
-  maxHP: 100,
+  maxHP: 6, // a "hit" is any shotgun blast that lands at least one pellet — always exactly 6 to go down
   noticeRadius: 20,
   engagedVisionConeDeg: 65, // half-angle: a bot already fighting only notices new threats inside this cone
   preferredRangeMin: 7,
@@ -39,6 +39,9 @@ export const COMBAT = {
   botStrafeSpeed: 4.2,
   botJumpChance: 0.006, // per-frame chance while in combat and grounded
   loseTargetTime: 4.5, // seconds without LOS before dropping a threat
+  knockbackImpulse: 15, // base horizontal speed (units/sec) a landed hit shoves the target
+  knockbackFriction: 5, // how fast knockback velocity decays (per second, multiplicative)
+  knockbackMax: 24, // clamp so stacked hits can't launch someone off the map
 };
 
 export const ENTITY_COUNT = {

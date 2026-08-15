@@ -77,11 +77,12 @@ export class Game {
     const skyMat = new THREE.MeshBasicMaterial({ map: skyTex, side: THREE.BackSide, fog: false });
     this.sky = new THREE.Mesh(skyGeo, skyMat);
     this.scene.add(this.sky);
-    // Light, airy fog matching the sky horizon — keeps the bright toy-town
-    // look clean at distance instead of muddying it with dusty haze.
-    this.scene.fog = new THREE.Fog(0xbfe7ff, 70, 175);
+    // Light, airy fog matching the sky horizon, pushed further out so it
+    // barely touches nearby colors — keeps the vivid toy-town palette clean
+    // instead of washing it out with haze.
+    this.scene.fog = new THREE.Fog(0xa8e0ff, 95, 220);
 
-    const hemi = new THREE.HemisphereLight(0xffffff, 0x8fd4dc, 1.1);
+    const hemi = new THREE.HemisphereLight(0xffffff, 0x2fd8e0, 1.15);
     this.scene.add(hemi);
 
     const sun = new THREE.DirectionalLight(0xfffaf0, 1.4);
@@ -143,6 +144,9 @@ export class Game {
       ch.reloadTimer = 0;
       ch.velocityY = 0;
       ch.grounded = true;
+      ch.knockback.set(0, 0, 0);
+      ch._deathSink = 0;
+      ch.root.rotation.z = 0;
       ch.root.position.set(p.x, 0, p.z);
       ch.root.rotation.set(0, ch.heading, 0);
       if (ch instanceof Bot) {
@@ -255,10 +259,17 @@ export class Game {
   _applyDamage(target, dmg, attacker) {
     if (!target.alive) return;
     const wasAlive = target.alive;
-    target.takeDamage(dmg);
+    target.takeHit();
+
+    // A landed blast always shoves the target hard, away from the shooter —
+    // scaled a little by how solid the hit was (more pellets/closer range
+    // knocks harder), but never trivial.
+    const knockScale = clamp(dmg / WEAPON.pelletDamageClose, 0.6, 1.5);
+    target.applyKnockback(attacker.forwardVector, COMBAT.knockbackImpulse * knockScale);
+
     if (target === this.player && target.alive) {
       this.audio.hitYelp();
-      this.player.addRecoilShake(0.05);
+      this.player.addRecoilShake(0.16);
     }
     if (wasAlive && !target.alive) {
       this._handleDeath(target, attacker);

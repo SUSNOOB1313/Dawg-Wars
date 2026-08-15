@@ -5,7 +5,8 @@ export class UI {
     this.loadingScreen = document.getElementById('loading-screen');
     this.hud = document.getElementById('hud');
 
-    this.hpBar = document.getElementById('hp-bar');
+    this.hpPips = document.getElementById('hp-pips');
+    this._hpPipsCount = 0;
     this.aliveCount = document.getElementById('alive-count');
     this.coinHud = document.getElementById('coin-count-hud');
     this.coinStart = document.getElementById('coin-count-start');
@@ -66,8 +67,19 @@ export class UI {
   }
 
   updateHP(hp, maxHp) {
-    const pct = Math.max(0, (hp / maxHp) * 100);
-    this.hpBar.style.width = `${pct}%`;
+    if (this._hpPipsCount !== maxHp) {
+      this.hpPips.innerHTML = '';
+      for (let i = 0; i < maxHp; i++) {
+        const pip = document.createElement('div');
+        pip.className = 'hp-pip';
+        this.hpPips.appendChild(pip);
+      }
+      this._hpPipsCount = maxHp;
+    }
+    const pips = this.hpPips.children;
+    for (let i = 0; i < pips.length; i++) {
+      pips[i].classList.toggle('filled', i < hp);
+    }
   }
 
   updateAliveCount(n) {

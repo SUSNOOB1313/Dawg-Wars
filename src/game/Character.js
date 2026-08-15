@@ -82,6 +82,7 @@ export class Character {
     this.hp = this.maxHP;
     this.alive = true;
     this.deathOrder = null; // set by Game on death
+    this.knockback = new THREE.Vector3(0, 0, 0); // horizontal velocity from being hit, decays over time
 
     this.reloadTimer = 0; // 0 = ready to fire
     this.muzzleFlashTimer = 0;
@@ -126,10 +127,40 @@ export class Character {
     return true;
   }
 
-  takeDamage(amount) {
+  // Every landed shotgun blast costs exactly one hit, regardless of how many
+  // pellets connected — clean and predictable: 6 hits down, no exceptions.
+  takeHit() {
     if (!this.alive) return;
-    this.hp = Math.max(0, this.hp - amount);
+    this.hp = Math.max(0, this.hp - 1);
     if (this.hp <= 0) this.alive = false;
+  }
+
+  // Shoves the character horizontally (e.g. from a shotgun blast). Stacks
+  // with any existing knockback so rapid multi-hits launch you further,
+  // clamped so it can't go absurd.
+  applyKnockback(direction, strength) {
+    this.knockback.x += direction.x * strength;
+    this.knockback.z += direction.z * strength;
+    const len = Math.hypot(this.knockback.x, this.knockback.z);
+    if (len > COMBAT.knockbackMax) {
+      const scale = COMBAT.knockbackMax / len;
+      this.knockback.x *= scale;
+      this.knockback.z *= scale;
+    }
+  }
+
+  _integrateKnockback(dt) {
+    if (this.knockback.x === 0 && this.knockback.z === 0) return;
+    this.position.x += this.knockback.x * dt;
+    this.position.z += this.knockback.z * dt;
+    resolveCollisions(this.position, this.radius, this.colliders);
+    const decay = Math.max(0, 1 - COMBAT.knockbackFriction * dt);
+    this.knockback.x *= decay;
+    this.knockback.z *= decay;
+    if (Math.hypot(this.knockback.x, this.knockback.z) < 0.05) {
+      this.knockback.x = 0;
+      this.knockback.z = 0;
+    }
   }
 
   // Applies tank-style movement: turn is +1 (turn left/CCW) .. -1 (turn right/CW),
@@ -177,11 +208,13 @@ export class Character {
 
   updatePhysics(dt) {
     if (!this.alive) {
+      this._integrateKnockback(dt); // a killing blow still sends the ragdoll skidding
       this._deathSink = Math.min(0.55, this._deathSink + dt * 1.4);
       this.root.rotation.z = Math.min(Math.PI / 2.1, this._deathSink * (Math.PI / 0.55));
       this.root.position.set(this.position.x, 0.05, this.position.z);
       return;
     }
+    this._integrateKnockback(dt);
     const wasGrounded = this.grounded;
     this.velocityY += WORLD.gravity * dt;
     let y = (this.root.position.y || 0) + this.velocityY * dt;

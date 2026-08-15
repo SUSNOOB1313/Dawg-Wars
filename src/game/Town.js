@@ -90,7 +90,7 @@ function aabbForBuilding(b) {
 
 function makeCactus(gradientMap) {
   const g = new THREE.Group();
-  const mat = new THREE.MeshToonMaterial({ color: '#5fcf6a', gradientMap: gradientMap || undefined });
+  const mat = new THREE.MeshToonMaterial({ color: '#2fdc4a', gradientMap: gradientMap || undefined });
   const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.28, 0.34, 2.0, 8), mat);
   trunk.position.y = 1.0;
   trunk.castShadow = true;
@@ -126,7 +126,7 @@ function makeCactus(gradientMap) {
 }
 
 function makeFencePost(gradientMap) {
-  const mat = new THREE.MeshToonMaterial({ color: '#e0a868', gradientMap: gradientMap || undefined });
+  const mat = new THREE.MeshToonMaterial({ color: '#f0b968', gradientMap: gradientMap || undefined });
   const g = new THREE.Group();
   const post = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.06, 1.1, 5), mat);
   post.position.y = 0.55;
@@ -138,7 +138,7 @@ function makeFencePost(gradientMap) {
 function makeWindmill(gradientMap) {
   const g = new THREE.Group();
   const woodMat = new THREE.MeshToonMaterial({ color: '#e0a868', gradientMap: gradientMap || undefined });
-  const metalMat = new THREE.MeshToonMaterial({ color: '#e8ecef', gradientMap: gradientMap || undefined });
+  const metalMat = new THREE.MeshToonMaterial({ color: '#f2f6fa', gradientMap: gradientMap || undefined });
   const tower = new THREE.Mesh(new THREE.CylinderGeometry(0.25, 0.5, 6, 8), woodMat);
   tower.position.y = 3;
   tower.castShadow = true;
@@ -178,13 +178,13 @@ export function buildTown(scene, gradientMap = null) {
   road.receiveShadow = true;
   scene.add(road);
 
-  // candy-colored storefronts: pink/salmon and orange/tan alternating, cream/teal accents
+  // candy-colored storefronts: vivid pink, orange, yellow, teal and magenta
   const buildingPalette = [
-    { wall: '#f5a8b8', trim: '#d97c8c' },
-    { wall: '#f7c07a', trim: '#d99a52' },
-    { wall: '#fbe3a3', trim: '#dcb96e' },
-    { wall: '#8fd4dc', trim: '#5fa8b0' },
-    { wall: '#f2a4d0', trim: '#c96fa0' },
+    { wall: '#ff7096', trim: '#d63f68' },
+    { wall: '#ffa733', trim: '#d97e12' },
+    { wall: '#ffdc4d', trim: '#dcac1e' },
+    { wall: '#2fd8e0', trim: '#159aa3' },
+    { wall: '#ff62c4', trim: '#d1339c' },
   ];
   const buildingsGroup = new THREE.Group();
   scene.add(buildingsGroup);

@@ -54,8 +54,8 @@ html, body {
 .panel {
   max-width: 560px;
   width: 100%;
-  background: linear-gradient(160deg, #3f68b8, #223a7a);
-  border: 3px solid #ffe6b0;
+  background: linear-gradient(160deg, #4a7dff, #1c2f8c);
+  border: 3px solid #fff3d6;
   border-radius: 18px;
   padding: clamp(18px, 4vw, 34px);
   text-align: center;
@@ -68,8 +68,8 @@ html, body {
   font-size: clamp(2rem, 7vw, 3.2rem);
   margin: 0 0 4px;
   letter-spacing: 4px;
-  color: #ff7a9c;
-  text-shadow: 0 3px 0 #1a2450, 0 0 24px rgba(255, 122, 156, 0.45);
+  color: #ff4d7d;
+  text-shadow: 0 3px 0 #14205e, 0 0 26px rgba(255, 77, 125, 0.55);
 }
 
 .subtitle {
@@ -112,18 +112,18 @@ html, body {
   font-weight: bold;
   letter-spacing: 2px;
   padding: 14px 30px;
-  background: linear-gradient(180deg, #6fc4f2, #2f8fd4);
-  border: 2px solid #1f5a8c;
+  background: linear-gradient(180deg, #5fd4ff, #0091ff);
+  border: 2px solid #0a5ca8;
   border-radius: 14px;
   color: #0b2536;
   cursor: pointer;
-  box-shadow: 0 6px 0 #1f5a8c, 0 10px 18px rgba(10,16,40,0.4);
+  box-shadow: 0 6px 0 #0a5ca8, 0 10px 18px rgba(10,16,40,0.4);
   transition: transform 0.08s ease;
   touch-action: manipulation;
 }
 .big-btn:active {
   transform: translateY(4px);
-  box-shadow: 0 2px 0 #1f5a8c, 0 4px 10px rgba(10,16,40,0.4);
+  box-shadow: 0 2px 0 #0a5ca8, 0 4px 10px rgba(10,16,40,0.4);
 }
 
 .controls-hint {
@@ -167,19 +167,22 @@ html, body {
   color: #bcd6ff;
   margin-bottom: 3px;
 }
-.hp-bar-bg {
-  width: 100%;
-  height: 12px;
-  background: #101a37;
-  border-radius: 6px;
-  overflow: hidden;
-  border: 1px solid #0a1122;
+.hp-pips {
+  display: flex;
+  gap: 5px;
 }
-.hp-bar-fill {
-  height: 100%;
-  width: 100%;
-  background: linear-gradient(90deg, #ff6f5e, #ffa64f);
-  transition: width 0.15s ease;
+.hp-pip {
+  width: 20px;
+  height: 20px;
+  border-radius: 7px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1.5px solid rgba(255, 255, 255, 0.3);
+  transition: background 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
+}
+.hp-pip.filled {
+  background: linear-gradient(160deg, #ff8a5c, #ff2f5c);
+  border-color: #ff2f5c;
+  box-shadow: 0 0 9px rgba(255, 47, 92, 0.65);
 }
 
 .alive-counter, .coin-hud {
@@ -320,7 +323,7 @@ html, body {
   width: 84px;
   height: 84px;
   border-radius: 50%;
-  border: 2px solid #1f5a8c;
+  border: 2px solid #0a5ca8;
   font-family: inherit;
   font-weight: bold;
   font-size: 0.85rem;
@@ -330,15 +333,15 @@ html, body {
   user-select: none;
 }
 .jump-btn {
-  background: radial-gradient(circle at 35% 30%, #9ed1f2, #3f8bc4);
-  border-color: #245a80;
+  background: radial-gradient(circle at 35% 30%, #8fe4ff, #0091ff);
+  border-color: #0a5ca8;
   color: #0b2536;
   width: 68px;
   height: 68px;
 }
 .fire-btn {
-  background: radial-gradient(circle at 35% 30%, #f2914a, #c0432b);
-  border-color: #8c3a1f;
+  background: radial-gradient(circle at 35% 30%, #ffab4d, #ff3b2f);
+  border-color: #a81f0a;
 }
 .fire-btn:active, .jump-btn:active {
   filter: brightness(1.15);

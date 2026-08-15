@@ -42,8 +42,11 @@ controls are used everywhere else.
 
 - 16 dogs enter (you + 15 bots), all free-for-all — nobody is on your team.
 - Everyone carries a pump shotgun that takes **1.5 seconds** to reload after
-  every shot. Damage falls off with range, so point-blank hits hurt a lot
-  more than a pot-shot from across the street.
+  every shot. Everyone can take **6 hits** before going down — any blast that
+  lands at least one pellet costs exactly one hit, shown as 6 HP pips, so it's
+  always predictable regardless of range or spread.
+- Every landed hit sends the target flying backward with real knockback —
+  stacking hits from multiple attackers launches you even further.
 - Jumping is exaggerated — dogs bounce *really* high, useful for dodging or
   just being a good dog.
 - A bot notices anyone who comes within **20m**. If it's not already fighting,
@@ -91,7 +94,9 @@ runtime:
   movement collision and shotgun/vision line-of-sight blocking.
 - **Combat** — `src/game/Weapon.js` fires a 9-pellet shotgun cone per trigger
   pull with per-pellet ray tests (sphere hitboxes + AABB wall blocking) and
-  range-based damage falloff.
+  range-based damage falloff. Health is a clean 6-hit counter rather than a
+  raw damage total — any blast that lands costs exactly one hit — while the
+  falloff value still scales how hard that hit's knockback impulse is.
 - **Bot AI** — `src/game/Bot.js` is a small state machine (wander ↔ combat)
   with radius + vision-cone detection, threat tracking/expiry, target
   leading based on estimated velocity, strafing/kiting to a preferred range,

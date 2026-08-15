@@ -4,7 +4,7 @@ import { WORLD, CAMERA } from './Constants.js';
 
 export class Player extends Character {
   constructor(opts) {
-    super({ ...opts, furHex: '#f6c945', bandanaHex: '#e8483a', name: 'You', isPlayer: true });
+    super({ ...opts, furHex: '#ffcc1a', bandanaHex: '#ff3b2f', name: 'You', isPlayer: true });
     this._camPos = new THREE.Vector3();
     this._camLook = new THREE.Vector3();
     this._camShake = 0;
