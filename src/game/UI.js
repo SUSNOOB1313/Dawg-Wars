@@ -15,6 +15,8 @@ export class UI {
     this.reloadBar = document.getElementById('reload-bar');
     this.killFeed = document.getElementById('kill-feed');
     this.noticeBanner = document.getElementById('notice-banner');
+    this.crosshair = document.getElementById('crosshair');
+    this._aimLocked = false;
 
     this.endTitle = document.getElementById('end-title');
     this.endPlacement = document.getElementById('end-placement');
@@ -84,6 +86,12 @@ export class UI {
 
   updateAliveCount(n) {
     this.aliveCount.textContent = n;
+  }
+
+  setAimLock(active) {
+    if (active === this._aimLocked) return;
+    this._aimLocked = active;
+    this.crosshair.classList.toggle('locked', active);
   }
 
   updateReload(reloadTimer, reloadTime) {

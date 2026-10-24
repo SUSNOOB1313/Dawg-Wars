@@ -64,4 +64,18 @@ export const CAMERA = {
   mobileFov: 74,
 };
 
+// Player-only aim assist — tank controls have no separate look axis, so
+// turning *is* aiming, which makes tracking the (quite accurate) bots hard.
+// These help two ways: a turn magnet that pulls your heading toward a
+// target you're already roughly swinging onto, and a bullet magnet that
+// nudges pellets toward whoever you're close to aiming at when you fire.
+export const AIM_ASSIST = {
+  turnMagnetConeDeg: 45, // half-angle: only pulls toward targets already within this much of center
+  turnMagnetStrength: 1.4, // extra turn-input-equivalent blended in at the edge of the cone
+  turnMagnetRange: 24,
+  bulletMagnetConeDeg: 20, // half-angle cone of forgiveness for pellet bias on fire
+  bulletMagnetPull: 0.6, // 0..1, how far pellets bend toward the target's exact bearing
+  bulletMagnetRange: 22,
+};
+
 export const COIN_STORAGE_KEY = 'dawgwars.coins.v1';

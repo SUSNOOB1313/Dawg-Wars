@@ -7,7 +7,7 @@ import { UI } from './UI.js';
 import { Economy } from './Economy.js';
 import { AudioSynth } from './AudioSynth.js';
 import { fireShotgun } from './Weapon.js';
-import { WORLD, WEAPON, COMBAT, ENTITY_COUNT, CAMERA } from './Constants.js';
+import { WORLD, WEAPON, COMBAT, ENTITY_COUNT, CAMERA, AIM_ASSIST } from './Constants.js';
 import { skyGradientTexture, toonGradientTexture } from './Textures.js';
 
 const deg2rad = (d) => (d * Math.PI) / 180;
@@ -186,7 +186,7 @@ export class Game {
   _update(dt) {
     this.input.poll();
 
-    this.player.update(dt, this.input);
+    this.player.update(dt, this.input, this.allCharacters);
     if (this.input.fireHeld && this.player.alive) {
       this._fireWeapon(this.player, 0);
     }
@@ -207,6 +207,7 @@ export class Game {
 
     this.ui.updateHP(this.player.hp, this.player.maxHP);
     this.ui.updateReload(this.player.reloadTimer, WEAPON.reloadTime);
+    this.ui.setAimLock(this.player.isAimLocked);
     const aliveCount = this.allCharacters.filter((c) => c.alive).length;
     this.ui.updateAliveCount(aliveCount);
   }
@@ -244,7 +245,15 @@ export class Game {
     this.audio.shotgunBlast(gain);
     if (shooter === this.player) this.player.addRecoilShake(WEAPON.fireRecoilKick);
 
-    const { hitsByTarget, origin, pelletDirs } = fireShotgun(shooter, this.allCharacters, this.colliders, extraSpread);
+    // Bullet magnet: nudge the player's shot toward whoever they're already
+    // roughly aimed at, for extra forgiveness on top of the turn assist.
+    let aimHeading = shooter.heading;
+    if (shooter === this.player) {
+      const assist = this.player.computeAimAssist(this.allCharacters, AIM_ASSIST.bulletMagnetConeDeg, AIM_ASSIST.bulletMagnetRange);
+      if (assist) aimHeading = shooter.heading + assist.diff * AIM_ASSIST.bulletMagnetPull;
+    }
+
+    const { hitsByTarget, origin, pelletDirs } = fireShotgun(shooter, this.allCharacters, this.colliders, extraSpread, aimHeading);
 
     let maxDist = WEAPON.maxRange;
     for (let i = 0; i < pelletDirs.length; i += 3) {

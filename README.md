@@ -38,6 +38,20 @@ preview it locally with `npm run preview`.
 Touch controls appear automatically on touch/coarse-pointer devices; keyboard
 controls are used everywhere else.
 
+### Aim assist
+
+Since tank controls have no separate look axis — turning *is* aiming — the
+player gets real aim assist to keep up with the bots:
+
+- **Turn magnet** — while an enemy is roughly ahead of you (within 45°) and
+  in sight, your heading gets pulled toward them, even with no input at all.
+  The crosshair turns red and pulses when it's got a lock. It never fights a
+  deliberate turn away, though — if you actively steer off a target to
+  disengage, the magnet backs off completely.
+- **Bullet magnet** — when you fire at someone within 20° of center, your
+  pellets bend toward their exact bearing, landing hits a raw unassisted
+  shot at that angle would have missed outright.
+
 ## The rules
 
 - 16 dogs enter (you + 15 bots), all free-for-all — nobody is on your team.
@@ -101,6 +115,11 @@ runtime:
   with radius + vision-cone detection, threat tracking/expiry, target
   leading based on estimated velocity, strafing/kiting to a preferred range,
   and turn-rate-limited aiming (so they're dangerous, not aimbots).
+- **Aim assist** — player-only, driven by `Character.computeAimAssist()` and
+  tuned via `AIM_ASSIST` in `Constants.js`: a turn magnet blended into the
+  player's turn input in `Player.update()` (never overriding a deliberate
+  turn away), and a bullet magnet that biases the aim heading passed into
+  `fireShotgun()` from `Game._fireWeapon()`.
 - **Economy** — `src/game/Economy.js` handles the placement → coin-reward
   table and persists the running balance in `localStorage`.
 

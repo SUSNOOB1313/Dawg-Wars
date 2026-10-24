@@ -57,7 +57,7 @@ const TARGET_HITBOX_HEIGHT = 0.85;
  * Fires one shotgun blast of pellets from `shooter` toward its forward
  * direction, with cone spread. Returns { hitsByTarget: Map<Character, dmg>, pelletDirs }
  */
-export function fireShotgun(shooter, allCharacters, colliders, extraSpreadRad = 0) {
+export function fireShotgun(shooter, allCharacters, colliders, extraSpreadRad = 0, aimHeading = shooter.heading) {
   const origin = shooter.muzzleWorldPosition();
   const halfAngle = WEAPON.spreadAngle + extraSpreadRad;
   const hitsByTarget = new Map();
@@ -68,7 +68,7 @@ export function fireShotgun(shooter, allCharacters, colliders, extraSpreadRad = 
   for (let i = 0; i < WEAPON.pelletCount; i++) {
     const yawJitter = (Math.random() * 2 - 1) * halfAngle;
     const pitchJitter = (Math.random() * 2 - 1) * halfAngle * 0.5;
-    const yaw = shooter.heading + yawJitter;
+    const yaw = aimHeading + yawJitter;
     const dir = new THREE.Vector3(Math.sin(yaw), pitchJitter, Math.cos(yaw)).normalize();
     pelletDirs.push(dir);
 
