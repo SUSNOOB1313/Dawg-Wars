@@ -69,17 +69,22 @@ export class Player extends Character {
 
   updateCamera(camera, dt) {
     const dogY = this.root.position.y;
-    const back = this.forwardVector.multiplyScalar(-CAMERA.followDistance);
-    const targetPos = new THREE.Vector3(
-      this.position.x + back.x,
+    const fwd = this.forwardVector;
+    const camTargetPos = new THREE.Vector3(
+      this.position.x - fwd.x * CAMERA.followDistance,
       dogY + CAMERA.followHeight,
-      this.position.z + back.z
+      this.position.z - fwd.z * CAMERA.followDistance
     );
-    this._camPos.lerp(targetPos, 1 - Math.pow(0.0008, dt));
+    this._camPos.lerp(camTargetPos, 1 - Math.pow(0.0008, dt));
+
+    // Look far out ahead along the dog's heading — not down at the dog's own
+    // body — so the crosshair dead-center of the screen actually matches
+    // where the shotgun's pellets travel, instead of sitting ~100+px below
+    // the real aim line.
     const lookTarget = new THREE.Vector3(
-      this.position.x,
+      this.position.x + fwd.x * CAMERA.lookAheadDistance,
       dogY + CAMERA.lookHeight,
-      this.position.z
+      this.position.z + fwd.z * CAMERA.lookAheadDistance
     );
     this._camLook.lerp(lookTarget, 1 - Math.pow(0.0005, dt));
 

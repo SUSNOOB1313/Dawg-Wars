@@ -60,6 +60,7 @@ export const CAMERA = {
   followDistance: 6.2,
   followHeight: 3.1,
   lookHeight: 1.1,
+  lookAheadDistance: 8, // camera looks this far out along the dog's heading, not down at the dog itself, tuned so the screen-center crosshair lines up tightest with the actual shot line across 7-13m (where bots actually fight)
   fov: 68,
   mobileFov: 74,
 };

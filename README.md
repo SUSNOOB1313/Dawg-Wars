@@ -52,6 +52,11 @@ player gets real aim assist to keep up with the bots:
   pellets bend toward their exact bearing, landing hits a raw unassisted
   shot at that angle would have missed outright.
 
+The camera itself is also calibrated for this: it looks out ahead along your
+heading rather than down at your own dog, so the crosshair dead-center of
+the screen lines up tightly with where your shots actually travel across the
+range bots typically fight at (7-13m) — not just in theory.
+
 ## The rules
 
 - 16 dogs enter (you + 15 bots), all free-for-all — nobody is on your team.
